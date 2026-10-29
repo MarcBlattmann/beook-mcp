@@ -287,7 +287,9 @@ function pageLib() {
     el.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
-  function setDropzone(field, value, state) {
+  // poolHandles maps P1, P2, ... to the pool items as they were when the fill call started,
+  // so handles from beook_read_exercise stay valid even after earlier drops in the same call.
+  function setDropzone(field, value, state, poolHandles) {
     if (!$ || !$.fn.droppable) throw new Error('Drag & drop library not available in this view');
     const zone = field.el;
     const uebung = zone.closest('.uebung') || document.body;
@@ -297,9 +299,14 @@ function pageLib() {
     // Resolve all wanted items before moving anything around.
     const items = asList(value).map((v) => {
       if (/^P\d+$/.test(v)) {
-        const handle = state.poolItems.find((p) => p.id === v);
-        if (!handle) throw new Error(`Unknown pool item ${v}`);
-        return handle.el;
+        const el = poolHandles.get(v);
+        if (!el) throw new Error(`Unknown pool item ${v}`);
+        const placed = !el.isConnected || el.closest('.placeholder, .placeholder-multi');
+        if (!el.matches('.answer-reusable') && (placed || used.has(el))) {
+          throw new Error(`Pool item ${v} is already placed in another field`);
+        }
+        used.add(el);
+        return el;
       }
       const available = pool.items.filter((p) => p.reusable || !used.has(p.el));
       const handle = matchOne(available, v, (p) => p.text, 'pool item');
@@ -352,6 +359,7 @@ function pageLib() {
   function fill(answers, expectedRef) {
     if (currentRef() !== expectedRef) throw new Error(`This view no longer shows ${expectedRef}; nothing was changed.`);
     const results = [];
+    const poolHandles = new Map(collect().poolItems.map((p) => [p.id, p.el]));
     for (const answer of answers) {
       const state = collect();
       const [fieldId, optionId] = /^F\d+\.\d+$/.test(answer.field)
@@ -372,7 +380,7 @@ function pageLib() {
             setSelect(field.el, answer.value);
             break;
           case 'dropzone':
-            setDropzone(field, answer.value, state);
+            setDropzone(field, answer.value, state, poolHandles);
             break;
           case 'order':
             setOrder(field, answer.value);
