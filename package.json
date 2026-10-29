@@ -1,0 +1,38 @@
+{
+  "name": "beook-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that lets AI assistants read and answer exercises in the beook ebook app",
+  "type": "module",
+  "bin": {
+    "beook-mcp": "src/index.js"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node --no-warnings src/index.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "beook",
+    "claude",
+    "ebook",
+    "school"
+  ],
+  "author": "Marc Blattmann",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarcBlattmann/beook-mcp.git"
+  },
+  "homepage": "https://github.com/MarcBlattmann/beook-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/MarcBlattmann/beook-mcp/issues"
+  }
+}
